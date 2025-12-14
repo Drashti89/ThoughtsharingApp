@@ -10,8 +10,8 @@ export default function Sidebar({onStartAddThought , thoughts , onSelectThought 
         setShowLogoutConfirm(true);
     };
 
-    const confirmLogout = () => {
-        onLogout();
+    const confirmLogout = async () => {
+        await onLogout();
         setShowLogoutConfirm(false);
         navigate('/');
     };

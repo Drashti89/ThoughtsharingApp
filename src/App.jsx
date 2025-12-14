@@ -260,12 +260,12 @@ export default function App() {
       <Routes>
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
         <Route path="/signup" element={!user ? <SignUp /> : <Navigate to="/" />} />
-        <Route path="/set-username" element={user && user.emailVerified ? <SetUsername /> : <Navigate to="/login" />} />
+        <Route path="/set-username" element={user && user.emailVerified ? <SetUsername /> : <Navigate to="/" />} />
         
         <Route path="/admin" element={
           user && user.isAdmin ? (
              !user.username ? <Navigate to="/set-username" /> : <MainLayout />
-          ) : <Navigate to="/login" />
+          ) : <Navigate to="/" />
         } />
 
         <Route path="/" element={
