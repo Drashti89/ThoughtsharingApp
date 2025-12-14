@@ -58,9 +58,14 @@ export default function SignUp() {
   };
 
   return (
-    <div className="flex items-center justify-center p-6">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <h2 className="text-2xl font-bold mb-2 text-gray-500">Welcome</h2>
+      <h1 className="text-[48px] font-bold font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif] bg-gradient-to-r from-[rgb(255,65,108)] via-[rgb(77,41,255)] to-[rgb(255,41,216)] bg-clip-text text-transparent mb-8 text-center pb-2">
+        ThoughtSharing App
+      </h1>
+      
       <div className="w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-center">
+        <h2 className="text-stone-500 mb-9 text-center">
           Create an account
         </h2>
 
@@ -86,9 +91,13 @@ export default function SignUp() {
             onChange={(e) => setConfirm(e.target.value)}
           />
 
-          <Button type="submit" disabled={processing} className="w-full">
+          <button 
+            type="submit" 
+            disabled={processing} 
+            className="w-full py-3 px-6 rounded-lg bg-black text-white text-xl font-semibold hover:bg-green-500 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {processing ? "Creating..." : "Create account"}
-          </Button>
+          </button>
         </form>
 
         {error && <div className="text-red-500 mt-4 text-center">{error}</div>}

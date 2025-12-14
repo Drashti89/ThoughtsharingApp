@@ -2,12 +2,14 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import Button from "./Button";
 import Input from "./input";
-import { getAuth, sendEmailVerification } from "firebase/auth";
+import { auth } from "../firebase";
+import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+
+import { toast } from 'react-toastify';
 
 export default function Login() {
   const { emailLogin, loading } = useAuth();
-  const auth = getAuth();
   const navigate = useNavigate();
 
   const [error, setError] = useState(null);
@@ -38,6 +40,8 @@ export default function Login() {
         return;
       }
 
+      toast.success("Logged in successfully 🎉");
+
       // 👑 ADMIN CHECK
       if (user.email === "drashtimanguwala@gmail.com") {
         navigate("/admin");
@@ -65,12 +69,15 @@ export default function Login() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full p-4">
-      <h2 className="text-2xl font-bold mb-4">Welcome</h2>
-      <p className="mb-6 text-center">Login to continue</p>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <h2 className="text-2xl font-bold mb-2 text-gray-500">Welcome</h2>
+      <h1 className="text-[48px] font-bold font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif] bg-gradient-to-r from-[rgb(255,65,108)] via-[rgb(77,41,255)] to-[rgb(255,41,216)] bg-clip-text text-transparent mb-8 text-center pb-2">
+        ThoughtSharing App
+      </h1>
+      <p className="mb-8 text-center text-stone-500">Login to continue</p>
 
       <div className="w-full max-w-md">
-        <div className="space-y-4">
+        <div className="space-y-6">
           <Input
             type="email"
             placeholder="Email"
@@ -85,9 +92,12 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <Button onClick={handleLogin} className="w-full">
+          <button 
+            onClick={handleLogin} 
+            className="w-full py-3 px-6 rounded-lg bg-black text-white text-xl font-semibold hover:bg-green-500 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
+          >
             Login
-          </Button>
+          </button>
         </div>
 
         {error && <div className="text-red-500 mt-4">{error}</div>}

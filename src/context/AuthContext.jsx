@@ -1,13 +1,14 @@
 // src/context/AuthContext.jsx
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
+import { doc, onSnapshot } from "firebase/firestore";
 
 const AuthContext = createContext();
 
@@ -18,26 +19,60 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔄 Auth state listener
+  // 🔄 Auth state listener with Real-time Firestore Sync
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (currentUser) => {
+    let unsubscribeFirestore = null;
+
+    const unsubAuth = onAuthStateChanged(auth, async (currentUser) => {
+      // Unsubscribe from previous user listener if any
+      if (unsubscribeFirestore) {
+        unsubscribeFirestore();
+        unsubscribeFirestore = null;
+      }
+
       // ❌ block unverified users globally
       if (currentUser && !currentUser.emailVerified) {
         setUser(null);
+        setLoading(false);
       } else if (currentUser) {
-        // ✅ attach admin flag
-        setUser({
-          ...currentUser,
-          isAdmin: currentUser.email === ADMIN_EMAIL,
-        });
+        // ✅ Real-time listener for user profile
+        try {
+           const userRef = doc(db, "users", currentUser.uid);
+           unsubscribeFirestore = onSnapshot(userRef, (docSnap) => {
+              const username = docSnap.exists() ? docSnap.data().username : null;
+              
+              setUser({
+                ...currentUser,
+                isAdmin: currentUser.email === ADMIN_EMAIL,
+                username: username,
+              });
+              setLoading(false);
+           }, (error) => {
+              console.error("Error listening to user doc:", error);
+              // Fallback just in case
+              setUser({
+                ...currentUser,
+                isAdmin: currentUser.email === ADMIN_EMAIL,
+                username: null,
+              });
+              setLoading(false);
+           });
+
+        } catch (error) {
+          console.error("Error setting up user listener:", error);
+          setUser(null);
+          setLoading(false);
+        }
       } else {
         setUser(null);
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
-    return () => unsub();
+    return () => {
+      unsubAuth();
+      if (unsubscribeFirestore) unsubscribeFirestore();
+    };
   }, []);
 
   // 📩 Email Login
@@ -58,7 +93,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider
       value={{
-        user,       // user + isAdmin flag
+        user,       // user + isAdmin flag + username
         loading,
         emailLogin,
         signup,
