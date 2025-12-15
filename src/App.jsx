@@ -23,6 +23,7 @@ import 'react-toastify/dist/ReactToastify.css';
 export default function App() {
   const { user, logout, loading: authLoading } = useAuth();
   const dispatch = useDispatch();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Sync Context Auth to Redux
   useEffect(() => {
@@ -46,7 +47,7 @@ export default function App() {
   const thoughts = useSelector(state => state.thoughts.items);
 
 
-  // 🔄 Load all thoughts
+
   // 🔄 Load all thoughts
   useEffect(() => {
     if (user) {
@@ -179,36 +180,53 @@ export default function App() {
   let content;
   if (selectedThought) {
     content = (
-      <div className="flex-1 h-screen overflow-y-auto p-4 bg-stone-100">
-        <SelectedThoughts
-          thought={selectedThought}
-          onDelete={() => handleDeleteThought(selectedThought.id)}
-          onEdit={handleEditThought}
-          onCancel={handleCancelThought}
-          user={user}
-          onToggleLike={handleToggleLike}
-        />
+      <div className="flex-1 w-full min-h-screen overflow-y-auto bg-gradient-to-br from-stone-50 via-white to-stone-100">
+        <div className="max-w-4xl mx-auto px-4 py-6 md:px-8 md:py-12">
+          <SelectedThoughts
+            thought={selectedThought}
+            onDelete={() => handleDeleteThought(selectedThought.id)}
+            onEdit={handleEditThought}
+            onCancel={handleCancelThought}
+            user={user}
+            onToggleLike={handleToggleLike}
+          />
+        </div>
       </div>
     );
   } else {
     content = (
-      <div className="flex-1 h-screen overflow-y-auto bg-stone-100">
-        <NotesGrid
-          thoughts={thoughts}
-          onSelectThought={handleSelectThought}
-          selectedThoughtId={selectedThoughtId}
-          onDelete={handleDeleteThought}
-          user={user}
-          onToggleLike={handleToggleLike}
-        />
+      <div className="flex-1 w-full min-h-screen overflow-y-auto bg-gradient-to-br from-stone-50 via-white to-stone-100">
+        <div className="max-w-6xl mx-auto px-4 py-6 md:px-8 md:py-12">
+          <NotesGrid
+            thoughts={thoughts}
+            onSelectThought={handleSelectThought}
+            selectedThoughtId={selectedThoughtId}
+            onDelete={handleDeleteThought}
+            user={user}
+            onToggleLike={handleToggleLike}
+          />
+        </div>
       </div>
     );
   }
 
   const MainLayout = () => (
     <>
-      <div className="my-10 flex h-screen overflow-hidden bg-stone-100">
+      {/* Hamburger Menu - Mobile Only */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="md:hidden fixed top-4 left-4 z-[60] p-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+
+
+      <div className="my-10 flex flex-col md:flex-row h-screen overflow-hidden bg-stone-100">
         <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
           onStartAddThought={handleStartThoughts}
           thoughts={thoughts}
           onSelectThought={handleSelectThought}
@@ -228,22 +246,25 @@ export default function App() {
       
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-xl">
-                <h3 className="text-xl font-bold text-stone-800 mb-4">Confirm Delete</h3>
-                <p className="text-stone-600 mb-6">do you want to delte your memories ?</p>
-                <div className="flex justify-end gap-3">
-                    <button 
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl border border-stone-100">
+                <div className="text-center mb-6">
+                    <span className="text-4xl block mb-3">🗑️</span>
+                    <h3 className="text-xl font-bold text-stone-800 mb-2">Delete Thought?</h3>
+                    <p className="text-stone-600">Are you sure you want to delete this memory? This action cannot be undone.</p>
+                </div>
+                <div className="flex gap-3">
+                    <button
                         onClick={cancelDelete}
-                        className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-md transition-colors"
+                        className="flex-1 px-4 py-3 text-stone-600 hover:bg-stone-100 rounded-xl transition-all duration-200 font-medium"
                     >
                         Cancel
                     </button>
-                    <button 
+                    <button
                         onClick={confirmDelete}
-                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                        className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
                     >
-                        Delete
+                        🗑️ Delete
                     </button>
                 </div>
             </div>

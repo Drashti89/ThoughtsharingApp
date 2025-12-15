@@ -58,45 +58,51 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
             </ErrorModal>
 
             {/* Modal Overlay */}
-            <div 
-                className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+            <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
                 onClick={handleCancel}
             >
                 {/* Modal Content */}
-                <div 
-                    className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+                <div
+                    className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border border-stone-100"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b">
-                        <h2 className="text-2xl font-bold text-stone-800">Add New Thought</h2>
-                        <button
-                            onClick={handleCancel}
-                            className="text-stone-400 hover:text-stone-600 text-2xl font-bold"
-                        >
-                            ×
-                        </button>
+                    <div className="bg-gradient-to-r from-violet-50 to-purple-50 px-8 py-6 border-b border-stone-100">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <span className="text-3xl">✨</span>
+                                <h2 className="text-2xl md:text-3xl font-bold text-stone-800">Add New Thought</h2>
+                            </div>
+                            <button
+                                onClick={handleCancel}
+                                className="text-stone-400 hover:text-stone-600 text-2xl font-bold p-2 hover:bg-white/50 rounded-full transition-all duration-200"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <p className="text-stone-600 mt-2">Capture your beautiful thoughts and ideas</p>
                     </div>
 
                     {/* Form */}
-                    <div className="p-6">
-                        <Input type="text" ref={title} label="title" />
-                        <Input ref={description} label="Thought" textarea />
+                    <div className="p-8">
+                        <Input type="text" ref={title} label="📝 Title" />
+                        <Input ref={description} label="💭 Your Thought" textarea />
                     </div>
 
                     {/* Footer */}
-                    <div className="flex items-center justify-end gap-4 p-6 border-t">
-                        <button 
-                            className="px-6 py-2 text-stone-800 hover:text-stone-950 font-semibold" 
+                    <div className="flex items-center justify-end gap-4 px-8 py-6 bg-stone-50 border-t border-stone-100">
+                        <button
+                            className="px-6 py-3 text-stone-600 hover:text-stone-800 font-semibold hover:bg-stone-100 rounded-xl transition-all duration-200"
                             onClick={handleCancel}
                         >
                             Cancel
                         </button>
-                        <button 
-                            className="px-6 py-2 rounded-md bg-stone-800 text-stone-50 hover:bg-stone-950"
+                        <button
+                            className="px-8 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:from-violet-600 hover:to-purple-700 font-semibold shadow-sm hover:shadow-md transition-all duration-200"
                             onClick={handleSave}
                         >
-                            Save
+                            💝 Save Thought
                         </button>
                     </div>
                 </div>
