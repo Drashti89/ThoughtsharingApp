@@ -38,13 +38,13 @@ const thoughtsSlice = createSlice({
         const alreadyLiked = thought.likedBy.includes(userId);
         if (alreadyLiked) {
             thought.likedBy = thought.likedBy.filter(id => id !== userId);
-            thought.likesCount = Math.max(0, (thought.likesCount || 0) - 1);
         } else {
             thought.likedBy.push(userId);
-            thought.likesCount = (thought.likesCount || 0) + 1;
         }
+        // Remove likesCount field as we'll use likedBy array length
+        delete thought.likesCount;
       }
-    }
+    },
   },
 });
 

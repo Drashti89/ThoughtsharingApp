@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { db } from "../firebase";
 import { collection, onSnapshot, deleteDoc, doc, query, orderBy } from "firebase/firestore";
+import { toDate } from '../utils/timestampUtils';
 
 export default function Admin({ user }) {
   const [allThoughts, setAllThoughts] = useState([]);
@@ -64,7 +65,9 @@ export default function Admin({ user }) {
                     {t.description}
                   </p>
                   <p className="text-stone-500 text-sm">
-                    {t.username || 'Unknown'} • Created: {new Date(t.createdAt).toLocaleDateString()}
+                    {t.username || 'Unknown'} • Created: {
+                      toDate(t.createdAt).toLocaleDateString()
+                    }
                   </p>
                 </div>
 

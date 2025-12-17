@@ -3,13 +3,15 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBYxtv04kEkfTiFhryyZqVHeLZP3OCfqEQ",
+  apiKey: "AIzaSyAmV95cXXygv-3mAdKvBmSlNRcIbVVfqkE",
   authDomain: "notesapp-55415.firebaseapp.com",
   projectId: "notesapp-55415",
-  storageBucket: "notesapp-55415.firebasestorage.app",
+  storageBucket: "notesapp-55415.appspot.com", // ✅ FIXED
   messagingSenderId: "794965930860",
-  appId: "1:794965930860:web:6f9430308de127d51df949"
+  appId: "1:794965930860:web:bc49d3021acb5f421df949",
 };
+
+
 
 const app = initializeApp(firebaseConfig);
 

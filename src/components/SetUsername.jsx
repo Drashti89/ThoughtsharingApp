@@ -21,14 +21,17 @@ export default function SetUsername() {
         e.preventDefault();
         setError('');
 
-        const trimmedUsername = username.trim();
-
-        // Validation
-        if (trimmedUsername.length < 3) {
-            setError('Username must be at least 3 characters');
+        if (!user) {
+            setError("User not authenticated. Please login again.");
             return;
-        }
+    }
 
+    const trimmedUsername = username.trim(); // ✅ FIX
+
+    if (trimmedUsername.length < 3) {
+        setError('Username must be at least 3 characters');
+        return;
+    }
         setLoading(true);
 
         try {
@@ -41,10 +44,16 @@ export default function SetUsername() {
             }
 
             // Save username to Firestore
-            await setDoc(doc(db, 'users', user.uid), {
-                username: trimmedUsername,
-                createdAt: serverTimestamp(),
-            });
+            await setDoc(
+                doc(db, 'users', user.uid),
+                {
+                    userId: user.uid,           // 🔑 REQUIRED
+                    username: trimmedUsername,
+                    createdAt: serverTimestamp(),
+                },
+                { merge: true }
+                );
+
 
             // Redirect to main app
             navigate('/');

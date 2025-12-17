@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaHeart, FaShieldAlt, FaPenFancy, FaSearch, FaUserLock, FaMagic, FaLightbulb } from 'react-icons/fa';
+import { FaHeart, FaShieldAlt, FaPenFancy, FaSearch, FaUserLock, FaMagic,  } from 'react-icons/fa';
 
 export default function Home() {
   return (

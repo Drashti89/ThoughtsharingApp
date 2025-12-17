@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import Button from "./Button";
 import Input from "./input";
 import { getAuth, sendEmailVerification, signOut } from "firebase/auth";
 
@@ -58,18 +57,18 @@ export default function SignUp() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <h2 className="text-2xl font-bold mb-2 text-gray-500">Welcome</h2>
-      <h1 className="text-[48px] font-bold font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif] bg-gradient-to-r from-[rgb(255,65,108)] via-[rgb(77,41,255)] to-[rgb(255,41,216)] bg-clip-text text-transparent mb-8 text-center pb-2">
-        ThoughtSharing App
-      </h1>
-      
+    <div className="flex flex-col items-center justify-center min-h-screen p-3 md:p-4">
       <div className="w-full max-w-md">
-        <h2 className="text-stone-500 mb-9 text-center">
+        <h2 className="text-sm md:text-2xl font-bold mb-1 md:mb-2 text-gray-500 text-center">Welcome</h2>
+        <h1 className="text-lg md:text-[48px] font-bold font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif] bg-gradient-to-r from-[rgb(255,65,108)] via-[rgb(77,41,255)] to-[rgb(255,41,216)] bg-clip-text text-transparent mb-4 md:mb-8 text-center md:leading-[1.2] md:py-2">
+          ThoughtSharing App
+        </h1>
+        
+        <h2 className="text-stone-500 mb-4 md:mb-8 text-center text-sm md:text-base">
           Create an account
         </h2>
 
-        <form onSubmit={handleEmailSignup} className="space-y-4">
+        <form onSubmit={handleEmailSignup} className="space-y-3 md:space-y-6">
           <Input
             type="email"
             placeholder="Email"
@@ -91,16 +90,16 @@ export default function SignUp() {
             onChange={(e) => setConfirm(e.target.value)}
           />
 
-          <button 
-            type="submit" 
-            disabled={processing} 
-            className="w-full py-3 px-6 rounded-lg bg-black text-white text-xl font-semibold hover:bg-green-500 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          <button
+            type="submit"
+            disabled={processing}
+            className="w-full py-2.5 md:py-3 px-4 md:px-6 rounded-lg bg-black text-white text-sm md:text-xl font-semibold hover:bg-green-500 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {processing ? "Creating..." : "Create account"}
           </button>
         </form>
 
-        {error && <div className="text-red-500 mt-4 text-center">{error}</div>}
+        {error && <div className="text-red-500 mt-3 md:mt-4 text-center text-sm md:text-base">{error}</div>}
       </div>
     </div>
   );

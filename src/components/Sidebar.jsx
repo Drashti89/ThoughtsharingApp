@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toDate } from '../utils/timestampUtils';
 
 export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts , onSelectThought , selectedThoughtId, onLogout, user, onResetUsername}){
     const [searchQuery, setSearchQuery] = useState('');
@@ -20,11 +21,15 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
         setShowLogoutConfirm(false);
     };
 
-    const filteredThoughts = thoughts.filter(thought => 
-        (thought.userId === user.uid) &&
+    const userId = user?.uid;
+
+    const filteredThoughts = thoughts.filter(thought =>
+        userId &&
+        thought.userId === userId &&
         thought.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
-    
+     
+
     return (
         <>
             {/* Backdrop for mobile */}
@@ -34,98 +39,171 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
                     onClick={onClose}
                 />
             )}
-            
-            <aside className={`w-[80%] md:w-96 lg:w-72 px-4 md:px-8 py-6 md:py-10 bg-stone-900 text-stone-50 md:rounded-r-xl md:h-screen flex flex-col fixed top-0 left-0 bottom-0 md:relative md:static z-50 overflow-y-auto transition-transform duration-300 ease-in-out ${
-                isOpen ? 'translate-x-0' : '-translate-x-full'
-            }`}>
-                <div className="flex justify-between items-start mb-6">
-                    <div className="flex items-center gap-3">
-                        <span className="text-2xl">💭</span>
+             
+          <aside
+              className={`
+                  w-[85%] md:w-[380px] lg:w-[360px]
+                  px-3 md:px-8 py-4 md:py-10
+                  bg-stone-900 text-stone-50
+                  md:rounded-r-xl
+                  flex flex-col
+                  fixed md:static
+                  top-0 left-0 bottom-0
+                  mt-0 md:mt-6 lg:mt-8
+                  z-50
+                  md:min-h-[calc(100vh-2rem)]
+                  md:overflow-y-visible
+                  transition-transform duration-300 ease-in-out
+                  ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+                  md:translate-x-0
+              `}
+          >
+
+             
+
+              {/* HEADER */}
+                   <div className="mb-4 md:mb-6  relative">
+
+                    <div className="mb-4 md:mb-6 mt-2 md:mt-4">
+
+                    {/* Hi Username (now on top, centered & bigger) */}
+                    <div className="flex justify-center mb-3 md:mb-5">
+                    <div className="flex items-center gap-1 md:gap-2 bg-stone-800/70 px-3 md:px-4 py-1.5 md:py-2 rounded-full">
+                        <span className="text-sm">👋</span>
+                        <p className="text-sm sm:text-base font-semibold text-stone-100">
+                        Hi, {user?.username}
+                        </p>
+                    </div>
+                    </div>
+
+
+                    {/* My Thoughts + Actions */}
+                    <div className="flex items-center justify-between">
+
+                        {/* Left: My Thoughts */}
+                        <div className="flex items-center gap-1 md:gap-3">
+                        <span className="text-base md:text-2xl">💭</span>
                         <div>
-                            <h2 className="font-bold md:text-xl text-stone-100 leading-tight">
-                                My Thoughts
+                            <h2 className="font-bold text-xs sm:text-sm md:text-lg text-stone-100 leading-tight">
+                            My Thoughts
                             </h2>
-                            <p className="text-xs text-stone-400 mt-1">Your personal space</p>
+                            <p className="text-xs sm:text-xs text-stone-400 mt-0.5">
+                            Your personal space
+                            </p>
                         </div>
-                        {/* Close button for mobile */}
-                        <button onClick={onClose} className="md:hidden p-2 text-stone-400 hover:text-stone-200 hover:bg-stone-800 rounded-lg transition-all duration-200">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
+                        </div>
+
+                        {/* Right: Logout + Reset */}
+                        <div className="flex flex-col items-start gap-1 md:gap-2 mt-0 md:mt-1">
+                        <button
+                            onClick={handleLogoutClick}
+                            className="
+                                w-full
+                                flex items-center gap-1 md:gap-2
+                                px-2 py-1 md:px-5 md:py-2
+                                text-xs md:text-base font-semibold
+                                rounded-xl
+                                text-stone-300
+                                hover:text-red-400
+                                hover:bg-red-500/10
+                                transition-all
+                            "
+                        >
+                             <span className="w-3 md:w-5 text-center">🚪</span>
+                             <span className='ml-1 md:ml-4 text-xs sm:text-sm'>Logout</span>
+                         </button>
+
+                          <button
+                            onClick={onResetUsername}
+                            className="
+                                w-full
+                                flex items-center gap-1 md:gap-2
+                                px-2 py-1 md:px-5 md:py-2
+                                text-xs md:text-base font-semibold
+                                rounded-xl
+                                text-stone-400
+                                hover:text-blue-400
+                                hover:bg-blue-500/10
+                                transition-all
+                            "
+                        >
+                             <span className="w-3 md:w-5 text-center">🔄</span>
+                             <span className='text-xs sm:text-sm'> Reset Name</span>
                         </button>
                     </div>
-                    <div className="flex flex-col md:flex-row gap-2 items-end md:items-center">
-                        <button onClick={handleLogoutClick} className="px-4 py-2 text-sm font-semibold rounded-xl text-stone-300 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200">
-                            🚪 Logout
-                        </button>
-                        <button onClick={onResetUsername} className="px-4 py-2 text-sm font-semibold rounded-xl text-stone-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200">
-                            🔄 Reset Name
-                        </button>
-                    </div>
+
+
                 </div>
-                
-                <div className="bg-stone-800/50 rounded-xl p-4 mb-8">
-                    <h3 className="text-sm font-semibold text-stone-300 mb-3">✨ Quick Actions</h3>
+            </div>
+        </div>
+
+                 
+
+                 <div className="bg-stone-800/50 rounded-xl p-2 md:p-4 mb-4 md:mb-8">
+                     
                     {!selectedThoughtId && (
-                        <button onClick={onStartAddThought} className="w-full px-4 py-3 text-sm md:text-base rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:from-violet-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md">
+                        <button onClick={onStartAddThought} className="w-full px-2 py-1.5 md:px-4 md:py-3 text-xs sm:text-sm md:text-sm rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:from-violet-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md">
                             ✨ Add new Thought
                         </button>
                     )}
                 </div>
-                
+                 
                 {/* Search Input */}
-                <div className="mb-6">
+                <div className="mb-3 md:mb-6">
                     <div className="relative">
                         <input
                             type="text"
                             placeholder="🔍 Search your thoughts..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full px-4 py-3 bg-stone-800 text-stone-200 rounded-xl border border-stone-700 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 placeholder-stone-400 transition-all duration-200"
+                            className="w-full px-2 py-1.5 md:px-4 md:py-3 bg-stone-800 text-stone-200 rounded-xl border border-stone-700 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 placeholder-stone-400 transition-all duration-200 text-xs sm:text-sm md:text-sm"
                         />
                     </div>
                 </div>
 
                 {/* Thoughts List */}
-                <div className="flex-1 overflow-y-auto">
-                    <div className="flex items-center gap-2 mb-4">
-                        <span className="text-lg">📚</span>
-                        <h3 className="text-sm font-semibold text-stone-300">Your Thoughts ({filteredThoughts.length})</h3>
+                <div className="flex-1">
+                    <div className="flex items-center gap-1 md:gap-2 mb-2 md:mb-4">
+                        <span className="text-xs md:text-lg">📚</span>
+                        <h3 className="text-xs sm:text-sm md:text-sm font-semibold text-stone-300">Your Thoughts ({filteredThoughts.length})</h3>
                     </div>
-                    
+                     
+
                     {filteredThoughts.length === 0 && searchQuery && (
-                        <div className="text-center py-8">
-                            <span className="text-3xl block mb-2">🔍</span>
-                            <p className="text-stone-500 text-sm">No thoughts found</p>
+                        <div className="text-center py-4 md:py-8">
+                            <span className="text-xl md:text-3xl block mb-2">🔍</span>
+                            <p className="text-stone-500 text-xs md:text-sm">No thoughts found</p>
                         </div>
                     )}
-                    
+                     
+
                     {filteredThoughts.length === 0 && !searchQuery && (
-                        <div className="text-center py-8">
-                            <span className="text-3xl block mb-2">📝</span>
-                            <p className="text-stone-500 text-sm">No thoughts yet</p>
+                        <div className="text-center py-4 md:py-8">
+                            <span className="text-xl md:text-3xl block mb-2">📝</span>
+                            <p className="text-stone-500 text-xs md:text-sm">No thoughts yet</p>
                             <p className="text-stone-600 text-xs mt-1">Create your first one above!</p>
                         </div>
                     )}
-                    
-                    <ul className="space-y-2">
+                     
+
+                    <ul className="space-y-1 md:space-y-2">
                         {filteredThoughts.map((thought) => {
                             return (
                                 <li key={thought.id}>
                                     <button
                                         onClick={() => onSelectThought(thought.id)}
-                                        className={`w-full text-left px-3 py-2 rounded-xl transition-all duration-200 ${
+                                        className={`w-full text-left px-1.5 py-1 md:px-3 md:py-2 rounded-xl transition-all duration-200 ${
                                             thought.id === selectedThoughtId
                                                 ? 'bg-violet-500/20 text-violet-100 border border-violet-400/30'
                                                 : 'text-stone-300 hover:bg-stone-800/50 hover:text-stone-100'
                                         }`}
                                     >
-                                        <div className="flex items-start gap-2">
-                                            <span className="text-sm mt-0.5">💭</span>
+                                        <div className="flex items-start gap-1 md:gap-2">
+                                            <span className="text-xs md:text-sm mt-0.5">💭</span>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium truncate">{thought.title}</p>
-                                                <p className="text-xs text-stone-500 mt-0.5">
-                                                    {new Date(thought.createdAt?.toDate ? thought.createdAt.toDate() : thought.createdAt || Date.now()).toLocaleDateString()}
+                                                <p className="text-xs sm:text-sm md:text-sm font-medium truncate">{thought.title}</p>
+                                                <p className="text-xs sm:text-xs text-stone-500 mt-0.5">
+                                                    {toDate(thought.createdAt).toLocaleDateString()}
                                                 </p>
                                             </div>
                                         </div>

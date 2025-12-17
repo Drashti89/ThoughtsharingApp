@@ -8,19 +8,24 @@ const ErrorModal =  forwardRef( function ErrorModal({children ,buttonCaption} ,r
     useImperativeHandle(ref , () =>{
        return { 
             open() {
-                dialog.current.showModal();
+                dialog.current?.showModal();
             }
        }
     });
-    return createPortal(
+    const modalRoot = document.getElementById('modal-root');
+
+        if (!modalRoot) return null;
+
+        return createPortal(
         <dialog ref={dialog} className='backdrop:bg-stone-900/90 p-4 rounded-md shadow-md'>
             {children}
-        <form method="dialog" className='mt-4 text-right'>
+            <form method="dialog" className='mt-4 text-right'>
             <Button>{buttonCaption}</Button>
-        </form>
+            </form>
         </dialog>,
-        document.getElementById('modal-root')
-    );
+        modalRoot
+        );
+
 })
 
 export default ErrorModal;

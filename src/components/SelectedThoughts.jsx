@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import { toDate } from '../utils/timestampUtils';
 
 export default function SelectedThoughts ({thought , onDelete , onEdit, onCancel, user, onToggleLike}){
     const [isEditing, setIsEditing] = useState(false);
     const [editedTitle, setEditedTitle] = useState(thought.title);
     const [editedDescription, setEditedDescription] = useState(thought.description);
-     
+    const [editedVisibility, setEditedVisibility] = useState(thought.visibility || 'public');
+      
     // ✅ Fix: Check likedBy array directly on the thought object
     const isLiked = user && thought.likedBy && thought.likedBy.includes(user.uid);
 
@@ -14,14 +15,16 @@ export default function SelectedThoughts ({thought , onDelete , onEdit, onCancel
     useEffect(() => {
         setEditedTitle(thought.title);
         setEditedDescription(thought.description);
+        setEditedVisibility(thought.visibility || 'public');
         setIsEditing(false);
     }, [thought.id]);
-     
+      
     const handleSave = () => {
         onEdit({
             ...thought,
             title: editedTitle,
-            description: editedDescription
+            description: editedDescription,
+            visibility: editedVisibility
         });
         setIsEditing(false);
     };
@@ -30,11 +33,18 @@ export default function SelectedThoughts ({thought , onDelete , onEdit, onCancel
         // Reset to original values
         setEditedTitle(thought.title);
         setEditedDescription(thought.description);
+        setEditedVisibility(thought.visibility || 'public');
         setIsEditing(false);
     };
-     
+      
+    // Get visibility info
+    const thoughtVisibility = thought.visibility || 'public';
+    const visibilityIcon = thoughtVisibility === 'public' ? '🌍' : '🔒';
+    const visibilityLabel = thoughtVisibility === 'public' ? 'Public' : 'Private';
+      
     return (
-        <div className="w-full">
+        <div className="w-full h-full overflow-y-auto mt-10">
+
             {/* Back Button */}
             <button
                 onClick={onCancel}
@@ -54,6 +64,17 @@ export default function SelectedThoughts ({thought , onDelete , onEdit, onCancel
                                 <span className="text-sm text-stone-500 font-medium px-3 py-1 bg-white rounded-full shadow-sm">
                                     {thought.username || 'Unknown'}
                                 </span>
+                                <span 
+                                    className="text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
+                                    style={{
+                                        backgroundColor: thoughtVisibility === 'public' ? '#dcfce7' : '#fef3c7',
+                                        color: thoughtVisibility === 'public' ? '#166534' : '#92400e'
+                                    }}
+                                    title={thoughtVisibility === 'public' ? '🌍 Public — visible to everyone' : '🔒 Private — only visible to you'}
+                                >
+                                    <span>{visibilityIcon}</span>
+                                    {visibilityLabel}
+                                </span>
                             </div>
                             <h1 className="text-2xl md:text-3xl font-bold text-stone-800 leading-tight">
                                 {thought.title}
@@ -72,13 +93,13 @@ export default function SelectedThoughts ({thought , onDelete , onEdit, onCancel
                                 )}
                             </button>
                             <span className="text-lg text-stone-700 font-semibold min-w-[30px]">
-                                {thought.likesCount || 0}
+                                {thought.likedBy ? thought.likedBy.length : 0}
                             </span>
                         </div>
                     </div>
                     
                     <p className="text-stone-600 text-sm mt-3">
-                        📅 Created: {new Date(thought.createdAt?.toDate ? thought.createdAt.toDate() : thought.createdAt || Date.now()).toLocaleDateString('en-US', {
+                        📅 Created: {toDate(thought.createdAt).toLocaleDateString('en-US', {
                             weekday: 'long',
                             year: 'numeric',
                             month: 'long',
@@ -114,8 +135,59 @@ export default function SelectedThoughts ({thought , onDelete , onEdit, onCancel
                                     rows="10"
                                 />
                             </div>
+
+                            {/* Visibility Edit */}
+                            <div>
+                                <label className="block text-sm font-semibold text-stone-700 mb-3">
+                                    🔒 Who can see this thought?
+                                </label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditedVisibility('public')}
+                                        className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                                            editedVisibility === 'public' 
+                                                ? 'border-violet-400 bg-violet-50' 
+                                                : 'border-stone-200 hover:border-stone-300'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-2xl">🌍</span>
+                                            <div>
+                                                <div className="font-semibold text-stone-800">Public</div>
+                                                <div className="text-sm text-stone-600">Visible to everyone</div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                    
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditedVisibility('private')}
+                                        className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                                            editedVisibility === 'private' 
+                                                ? 'border-violet-400 bg-violet-50' 
+                                                : 'border-stone-200 hover:border-stone-300'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-2xl">🔒</span>
+                                            <div>
+                                                <div className="font-semibold text-stone-800">Private</div>
+                                                <div className="text-sm text-stone-600">Only visible to you</div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                                
+                                <div className="mt-3 flex items-center gap-2 text-sm">
+                                    <span className="text-stone-600">Selected:</span>
+                                    <span className="font-medium">
+                                        {editedVisibility === 'public' ? '🌍 Public' : '🔒 Private'}
+                                    </span>
+                                </div>
+                            </div>
                             
-                            <div className="flex gap-3 pt-4">
+                            <div className="sticky bottom-0 bg-white pt-4 mt-8 border-t border-stone-200 flex gap-3">
                                 <button
                                     className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
                                     onClick={handleSave}

@@ -40,7 +40,7 @@ export default function Login() {
         return;
       }
 
-      toast.success("Logged in successfully 🎉");
+    toast.success("Logged in successfully 🎉", { className: "custom-toast custom-toast-success" });
 
       // 👑 ADMIN CHECK
       if (user.email === "drashtimanguwala@gmail.com") {
@@ -50,7 +50,6 @@ export default function Login() {
       }
 
     } catch (err) {
-      console.log("Login error:", err);
 
       if (err.code === "auth/invalid-email") {
         setError("Invalid email format");
@@ -69,15 +68,15 @@ export default function Login() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <h2 className="text-2xl font-bold mb-2 text-gray-500">Welcome</h2>
-      <h1 className="text-[48px] font-bold font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif] bg-gradient-to-r from-[rgb(255,65,108)] via-[rgb(77,41,255)] to-[rgb(255,41,216)] bg-clip-text text-transparent mb-8 text-center pb-2">
+    <div className="flex flex-col items-center min-h-screen p-3 md:p-4 md:pt-24 lg:flex lg:flex-col lg:justify-center lg:items-center">
+      <h2 className="text-sm md:text-2xl font-bold mb-1 md:mb-2 text-gray-500">Welcome</h2>
+      <h1 className="text-lg md:text-[48px] font-bold font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif] bg-gradient-to-r from-[rgb(255,65,108)] via-[rgb(77,41,255)] to-[rgb(255,41,216)] bg-clip-text text-transparent mb-4 md:mb-12 text-center md:leading-[1.2] md:py-2">
         ThoughtSharing App
       </h1>
-      <p className="mb-8 text-center text-stone-500">Login to continue</p>
+      <p className="mb-4 md:mb-10 text-center text-stone-500 text-sm md:text-base">Login to continue</p>
 
       <div className="w-full max-w-md">
-        <div className="space-y-6">
+        <div className="space-y-3 md:space-y-8">
           <Input
             type="email"
             placeholder="Email"
@@ -92,15 +91,15 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <button 
-            onClick={handleLogin} 
-            className="w-full py-3 px-6 rounded-lg bg-black text-white text-xl font-semibold hover:bg-green-500 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
+          <button
+            onClick={handleLogin}
+            className="w-full py-2.5 md:py-3 px-4 md:px-6 rounded-lg bg-black text-white text-sm md:text-xl font-semibold hover:bg-green-500 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
           >
             Login
           </button>
         </div>
 
-        {error && <div className="text-red-500 mt-4">{error}</div>}
+        {error && <div className="text-red-500 mt-3 md:mt-4 text-sm md:text-base">{error}</div>}
 
         {error?.includes("verify") && (
           <button
@@ -110,13 +109,13 @@ export default function Login() {
                 setError("Verification email resent. Check inbox or spam.");
               }
             }}
-            className="text-sm text-blue-600 underline mt-2"
+            className="text-xs md:text-sm text-blue-600 underline mt-2"
           >
             Resend verification email
           </button>
         )}
 
-        <p className="text-sm text-center mt-4">
+        <p className="text-xs md:text-sm text-center mt-3 md:mt-4">
           Don&apos;t have an account?{" "}
           <a href="/signup" className="text-blue-600 underline">
             Sign up
