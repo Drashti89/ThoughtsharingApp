@@ -27,6 +27,7 @@ export default function App() {
   const dispatch = useDispatch();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   
   // Check if user is new (first time login)
   useEffect(() => {
@@ -70,6 +71,22 @@ export default function App() {
     }
   }, [user, authLoading, dispatch]);
 
+  // Check if user is first-time (no username in Firestore)
+  useEffect(() => {
+    if (user && user.emailVerified) {
+      const userRef = doc(db, 'users', user.uid);
+      const unsubscribe = onSnapshot(userRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setIsFirstTimeUser(!data.username);
+        } else {
+          setIsFirstTimeUser(true);
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [user]);
+
   const { isAddModalOpen, selectedThoughtId } = useSelector(state => state.ui);
   const thoughts = useSelector(state => state.thoughts.items);
 
@@ -85,12 +102,20 @@ export default function App() {
         return {
           id: doc.id,
           ...data,
-          createdAt: normalizeTimestamp(data.createdAt) // Normalize to milliseconds
+          createdAt: normalizeTimestamp(data.createdAt), // Normalize to milliseconds
+          updatedAt: data.updatedAt ? normalizeTimestamp(data.updatedAt) : null // Normalize updatedAt if it exists
         };
       });
 
+        // Sort thoughts by updatedAt if available, otherwise by createdAt
+        const sortedThoughts = [...allThoughts].sort((a, b) => {
+          const timeA = a.updatedAt ? a.updatedAt : a.createdAt;
+          const timeB = b.updatedAt ? b.updatedAt : b.createdAt;
+          return timeB - timeA; // Descending order
+        });
+
         // Filter thoughts based on visibility
-        const filteredThoughts = allThoughts.filter(thought => {
+        const filteredThoughts = sortedThoughts.filter(thought => {
           // If thought has no visibility field (old thoughts), treat as public
           const thoughtVisibility = thought.visibility || 'public';
           
@@ -153,10 +178,13 @@ export default function App() {
   }
 
   function handleEditThought(updatedThought) {
-    if (user && (user.isAdmin || updatedThought.userId === user.uid)) 
+    if (user && (user.isAdmin || updatedThought.userId === user.uid))
     {
       const { id, ...data } = updatedThought;
-      updateDoc(doc(db, 'thoughts', updatedThought.id), data)
+      updateDoc(doc(db, 'thoughts', updatedThought.id), {
+        ...data,
+        updatedAt: serverTimestamp()
+      })
         .then(() => toast.success("Thought updated successfully ✅", { className: "custom-toast custom-toast-success" }))
         .catch(err => toast.error("Error updating thought", { className: "custom-toast custom-toast-error" }));
     }
@@ -170,6 +198,7 @@ export default function App() {
       userId: user.uid,
       username: user.username || 'Unknown',
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
       likedBy: []
     };
 
@@ -191,11 +220,13 @@ export default function App() {
   
         if (alreadyLiked) {
              await updateDoc(thoughtRef, {
-                likedBy: arrayRemove(user.uid)
+                likedBy: arrayRemove(user.uid),
+                updatedAt: serverTimestamp()
             });
         } else {
              await updateDoc(thoughtRef, {
-                likedBy: arrayUnion(user.uid)
+                likedBy: arrayUnion(user.uid),
+                updatedAt: serverTimestamp()
             });
         }
     } catch (e) {
@@ -370,7 +401,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
         <Route path="/signup" element={!user ? <SignUp /> : <Navigate to="/" />} />
-        <Route path="/set-username" element={user && user.emailVerified ? <SetUsername /> : <Navigate to="/" />} />
+        <Route path="/set-username" element={user && user.emailVerified && isFirstTimeUser ? <SetUsername /> : <Navigate to="/" />} />
         
         <Route path="/admin" element={
           user && user.isAdmin ? (
@@ -380,8 +411,8 @@ export default function App() {
 
         <Route path="/" element={
           user ? (
-            user.isAdmin ? <Navigate to="/admin" /> : 
-            (!user.username ? <Navigate to="/set-username" /> : <MainLayout />)
+            user.isAdmin ? <Navigate to="/admin" /> :
+            (isFirstTimeUser ? <Navigate to="/set-username" /> : <MainLayout />)
           ) : <Home />
         } />
       </Routes>

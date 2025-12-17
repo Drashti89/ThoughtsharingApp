@@ -9,6 +9,7 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
     const description = useRef();
     const [visibility, setVisibility] = useState('public'); // Default to public
     const [showTooltip, setShowTooltip] = useState(null);
+
     
     // Reset form when modal opens/closes
     useEffect(() => {
@@ -108,7 +109,7 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
             >
                 {/* Modal Content */}
                 <div
-                    className="bg-white rounded-2xl shadow-2xl w-full max-w-[90vw] sm:max-w-2xl max-h-[85vh] md:max-h-[80vh] border border-stone-100"
+                    className="bg-white rounded-2xl shadow-2xl w-full max-w-[90vw] sm:max-w-2xl border border-stone-100"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}
@@ -129,7 +130,7 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
                     </div>
 
                     {/* Scrollable Form Content */}
-                    <div className="md:overflow-y-auto">
+                    <div className="overflow-y-auto max-h-[70vh] modal-scrollbar">
                         {/* Form */}
                         <div className="p-4 sm:p-8">
                             <Input type="text" ref={title} label="📝 Title" />
