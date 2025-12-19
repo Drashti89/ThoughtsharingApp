@@ -51,3 +51,31 @@
     transform: translateX(0) translateY(0);
   }
 }
+
+/* ===== Custom Brown Scrollbar ===== */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3f3129 #1c1917; /* thumb | track */
+}
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1c1917;   /* dark background */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #6b4f3f; /* BROWN */
+  border-radius: 10px;
+  border: 2px solid #1c1917;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #8b5e3c; /* lighter brown on hover */
+}
