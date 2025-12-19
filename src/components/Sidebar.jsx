@@ -49,28 +49,30 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
             )}
              
           <aside
-                className={`
-                    w-[85%] md:w-[380px] lg:w-[360px]
-                    px-3 md:px-8 py-4 md:py-1
-                    bg-stone-900 text-stone-50
-                    md:rounded-r-xl
-                    flex flex-col
+            className={`
+                w-[85%] md:w-[380px] lg:w-[360px]
+                px-3 md:px-8 py-4 md:py-10
+                bg-stone-900 text-stone-50
+                md:rounded-r-xl
+                flex flex-col
 
-                    /* 🔑 KEY CHANGES */
-                    md:sticky md:top-10
-                    md:h-[calc(100vh-2rem)]
-                    md:overflow-y-auto
+                /* 🔑 KEY FIX */
+                fixed md:static
+                top-0 left-0 bottom-0
+                h-[100dvh] md:h-auto
+                overflow-y-auto md:overflow-visible
 
-                    /* Mobile behaviour */
-                    fixed md:static
-                    top-0 left-0
-                    z-50
+                mt-0 md:mt-6 lg:mt-8
+                z-50
+                transition-transform duration-300 ease-in-out
+                ${isOpen ? "translate-x-0" : "-translate-x-full"}
+                md:translate-x-0
+                
 
-                    transition-transform duration-300 ease-in-out
-                    ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-                    md:translate-x-0
-                `}
-                >
+            `}
+            style={{ WebkitOverflowScrolling: "touch" }}
+            >
+
           
 
              
