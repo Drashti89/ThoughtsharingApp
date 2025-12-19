@@ -43,8 +43,7 @@ export default function SelectedThoughts ({thought , onDelete , onEdit, onCancel
     const visibilityLabel = thoughtVisibility === 'public' ? 'Public' : 'Private';
       
     return (
-        <div className="w-full h-full overflow-y-auto mt-10">
-
+        <div className="w-full h-full overflow-y-auto">
             {/* Back Button */}
             <button
                 onClick={onCancel}

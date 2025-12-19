@@ -2,12 +2,16 @@ import { useSelector } from 'react-redux';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { toDate } from '../utils/timestampUtils';
 
+
+
 export default function NotesGrid({ thoughts, onSelectThought, selectedThoughtId, onDelete, user, onToggleLike, onStartWriting }) {
-    const likedThoughtIds = useSelector(state => state.ui.likedThoughtIds);
+        const uniqueThoughts = Array.from(
+                new Map(thoughts.map(t => [t.id, t])).values()
+            );
 
     return (
-        <div className="w-full mt-4 md:mt-8">
-            {/* Welcome Header */}
+       <div className="w-full mt-8 md:mt-14">
+             {/* welcome header */}
             <div className="text-center mb-6 md:mb-12">
                 <div className="inline-flex items-center gap-1 md:gap-3 mb-2 md:mb-4">
                     <span className="text-xl md:text-4xl">🌟</span>
@@ -45,7 +49,7 @@ export default function NotesGrid({ thoughts, onSelectThought, selectedThoughtId
             )}
              
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
-                {thoughts.map((thought) => {
+                {uniqueThoughts.map((thought)  => {
                     const isSelected = thought.id === selectedThoughtId;
                     const isOwner = user && thought.userId === user.uid;
                     const isAdmin = user && user.isAdmin;
@@ -108,8 +112,10 @@ export default function NotesGrid({ thoughts, onSelectThought, selectedThoughtId
                                     <div className="flex items-center gap-1">
                                         <button
                                             onClick={(e) => {
-                                                e.stopPropagation();
-                                                onToggleLike(thought.id);
+                                               e.stopPropagation();
+                                                if (isOwner || thought.visibility === 'public') {
+                                                    onToggleLike(thought.id);
+                                                }
                                             }}
                                             className="focus:outline-none transition-all duration-200 hover:scale-110 active:scale-95"
                                         >
@@ -137,7 +143,7 @@ export default function NotesGrid({ thoughts, onSelectThought, selectedThoughtId
                                         📖 Read More
                                     </button>
                                      
-                                    {(isOwner || isAdmin) && (
+                                   {(isOwner || (isAdmin && thought.visibility === 'public')) && (
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();

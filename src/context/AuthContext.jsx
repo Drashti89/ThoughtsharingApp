@@ -1,6 +1,7 @@
 // src/context/AuthContext.jsx
 
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { auth, db } from "../firebase";
 import {
   signInWithEmailAndPassword,
@@ -8,113 +9,81 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
+import { setUser as setReduxUser, logoutUser } from "../store/authSlice";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // 🔐 keep firestore unsubscribe stable across renders
-  const firestoreUnsubRef = useRef(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      // 🔥 cleanup previous firestore listener
-      if (firestoreUnsubRef.current) {
-        firestoreUnsubRef.current();
-        firestoreUnsubRef.current = null;
-      }
-
-      // ❌ no user
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      // 🔴 No user
       if (!currentUser) {
         setUser(null);
+        dispatch(logoutUser());
         setLoading(false);
         return;
       }
 
-      // ❌ block unverified users globally
+      // 🔴 Email not verified
       if (!currentUser.emailVerified) {
+        await signOut(auth);
         setUser(null);
+        dispatch(logoutUser());
         setLoading(false);
         return;
       }
 
-      // ✅ attach firestore listener ONLY after auth is ready
-      const userRef = doc(db, "users", currentUser.uid);
+      try {
+        // ✅ ONE-TIME READ (NO LISTENER)
+        const snap = await getDoc(doc(db, "users", currentUser.uid));
+        const data = snap.exists() ? snap.data() : {};
 
-      firestoreUnsubRef.current = onSnapshot(
-        userRef,
-        (docSnap) => {
-          const data = docSnap.exists() ? docSnap.data() : {};
+        const userObj = {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          emailVerified: currentUser.emailVerified,
+          isAdmin: data.role === "admin",
+          username: data.username || null,
+        };
 
-          setUser({
-            uid: currentUser.uid,
-            email: currentUser.email,
-            emailVerified: currentUser.emailVerified,
-            isAdmin: data.role === "admin",
-            username: data.username || null,
-          });
-
-          setLoading(false);
-        },
-        (error) => {
-          console.error("🔥 Firestore user listener error:", error);
-
-          // safe fallback
-          setUser({
-            uid: currentUser.uid,
-            email: currentUser.email,
-            emailVerified: currentUser.emailVerified,
-            isAdmin: false,
-            username: null,
-          });
-
-          setLoading(false);
+        setUser(userObj);
+        dispatch(setReduxUser(userObj));
+      } catch (err) {
+        // 🔕 Ignore permission errors during logout race
+        if (err.code !== "permission-denied") {
+          console.error("AuthContext error:", err);
         }
-      );
+      } finally {
+        setLoading(false);
+      }
     });
 
-    return () => {
-      unsubscribeAuth();
-      if (firestoreUnsubRef.current) {
-        firestoreUnsubRef.current();
-      }
-    };
-  }, []);
+    return () => unsubscribe();
+  }, [dispatch]);
 
-  // 📩 Email Login
-  const emailLogin = async (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password);
-  };
+  // 📩 Login
+  const emailLogin = (email, password) =>
+    signInWithEmailAndPassword(auth, email, password);
 
-  // 🆕 Email Signup
-  const signup = async (email, password) => {
-    return createUserWithEmailAndPassword(auth, email, password);
-  };
+  // 🆕 Signup
+  const signup = (email, password) =>
+    createUserWithEmailAndPassword(auth, email, password);
 
-  // 🚪 Logout (force cleanup)
+  // 🚪 Logout
   const logout = async () => {
-    if (firestoreUnsubRef.current) {
-      firestoreUnsubRef.current();
-      firestoreUnsubRef.current = null;
-    }
     setUser(null);
-    return signOut(auth);
+    dispatch(logoutUser());
+    await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,       // uid, email, isAdmin, username
-        loading,
-        emailLogin,
-        signup,
-        logout,
-      }}
-    >
-      {!loading && children}
+    <AuthContext.Provider value={{ user, loading, emailLogin, signup, logout }}>
+      {children}
     </AuthContext.Provider>
   );
 }

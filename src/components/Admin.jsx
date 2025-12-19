@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { db } from "../firebase";
-import { collection, onSnapshot, deleteDoc, doc, query, orderBy } from "firebase/firestore";
+import { collection, onSnapshot, deleteDoc, doc, query, orderBy , where} from "firebase/firestore";
 import { toDate } from '../utils/timestampUtils';
 
 export default function Admin({ user }) {
@@ -8,8 +8,11 @@ export default function Admin({ user }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
+    
     const q = query(
       collection(db, "thoughts"),
+      where("visibility", "==", "public"),
       orderBy("createdAt", "desc")
     );
 
@@ -31,11 +34,16 @@ export default function Admin({ user }) {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this thought?")) return;
-    await deleteDoc(doc(db, "thoughts", id));
+    try {
+      await deleteDoc(doc(db, "thoughts", id));
+    } catch (err) {
+      alert("You cannot delete this thought");
+    }
+
   };
 
   return (
@@ -71,12 +79,15 @@ export default function Admin({ user }) {
                   </p>
                 </div>
 
+                {t.visibility === "public" && (
                 <button
                   onClick={() => handleDelete(t.id)}
                   className="px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 text-sm ml-4"
                 >
                   Delete
                 </button>
+              )}
+
               </div>
             </li>
           ))}

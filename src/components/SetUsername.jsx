@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { db } from '../firebase';
 import { doc, setDoc, serverTimestamp, query, collection, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
+import { toast } from "react-toastify";
 import { useNavigate } from 'react-router-dom';
 
 export default function SetUsername() {
@@ -45,14 +46,24 @@ export default function SetUsername() {
 
             // Save username to Firestore
             await setDoc(
-                doc(db, 'users', user.uid),
-                {
-                    userId: user.uid,           // 🔑 REQUIRED
-                    username: trimmedUsername,
-                    createdAt: serverTimestamp(),
-                },
-                { merge: true }
-                );
+            doc(db, 'users', user.uid),
+            {
+                userId: user.uid,
+                username: trimmedUsername,
+                createdAt: serverTimestamp(),
+            },
+            { merge: true }
+            );
+
+            // ✅ SUCCESS POPUP
+            toast.success("Username set successfully 🎉");
+
+            // Redirect after a tiny delay so toast is visible
+            setTimeout(() => {
+            navigate('/');
+            }, 800);
+
+            
 
 
             // Redirect to main app

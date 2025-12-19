@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   items: [], // Array of thought objects
@@ -7,46 +7,88 @@ const initialState = {
 };
 
 const thoughtsSlice = createSlice({
-  name: 'thoughts',
+  name: "thoughts",
   initialState,
   reducers: {
     setThoughts: (state, action) => {
       state.items = action.payload;
       state.loading = false;
+      state.error = null;
     },
+
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
+
     addThought: (state, action) => {
       state.items.unshift(action.payload);
     },
+
     updateThought: (state, action) => {
-      const index = state.items.findIndex(t => t.id === action.payload.id);
+      const index = state.items.findIndex(
+        (t) => t.id === action.payload.id
+      );
+
       if (index !== -1) {
-        state.items[index] = { ...state.items[index], ...action.payload };
+        // ✅ only update allowed fields safely
+        state.items[index] = {
+          ...state.items[index],
+          ...action.payload,
+          likedBy: action.payload.likedBy ?? state.items[index].likedBy,
+        };
       }
     },
+
     deleteThought: (state, action) => {
-      state.items = state.items.filter(t => t.id !== action.payload);
+      state.items = state.items.filter(
+        (t) => t.id !== action.payload
+      );
     },
+
     toggleLikeOptimistic: (state, action) => {
       const { thoughtId, userId } = action.payload;
-      const thought = state.items.find(t => t.id === thoughtId);
-      if (thought) {
-        if (!thought.likedBy) thought.likedBy = [];
-        
-        const alreadyLiked = thought.likedBy.includes(userId);
-        if (alreadyLiked) {
-            thought.likedBy = thought.likedBy.filter(id => id !== userId);
-        } else {
-            thought.likedBy.push(userId);
-        }
-        // Remove likesCount field as we'll use likedBy array length
-        delete thought.likesCount;
+      const thought = state.items.find((t) => t.id === thoughtId);
+
+      if (!thought) return;
+
+      if (!Array.isArray(thought.likedBy)) {
+        thought.likedBy = [];
+      }
+
+      const index = thought.likedBy.indexOf(userId);
+
+      if (index >= 0) {
+        thought.likedBy.splice(index, 1);
+      } else {
+        thought.likedBy.push(userId);
+      }
+    },
+
+    // 🔥 rollback if Firestore fails
+    revertLike: (state, action) => {
+      const { thoughtId, userId } = action.payload;
+      const thought = state.items.find((t) => t.id === thoughtId);
+      if (!thought || !Array.isArray(thought.likedBy)) return;
+
+      const index = thought.likedBy.indexOf(userId);
+
+      if (index >= 0) {
+        thought.likedBy.splice(index, 1);
+      } else {
+        thought.likedBy.push(userId);
       }
     },
   },
 });
 
-export const { setThoughts, setLoading, addThought, updateThought, deleteThought, toggleLikeOptimistic } = thoughtsSlice.actions;
+export const {
+  setThoughts,
+  setLoading,
+  addThought,
+  updateThought,
+  deleteThought,
+  toggleLikeOptimistic,
+  revertLike,
+} = thoughtsSlice.actions;
+
 export default thoughtsSlice.reducer;

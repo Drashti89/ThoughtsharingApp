@@ -23,11 +23,19 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
 
     const userId = user?.uid;
 
+    // 1️⃣ filter
     const filteredThoughts = thoughts.filter(thought =>
-        userId &&
-        thought.userId === userId &&
-        thought.title.toLowerCase().includes(searchQuery.toLowerCase())
+    userId &&
+    thought.userId === userId &&
+    thought.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    // 2️⃣ dedupe
+    const uniqueFilteredThoughts = Array.from(
+    new Map(filteredThoughts.map(t => [t.id, t])).values()
+    );
+
+  
      
 
     return (
@@ -47,7 +55,7 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
                   bg-stone-900 text-stone-50
                   md:rounded-r-xl
                   flex flex-col
-                  fixed md:static
+                  fixed md:static h-screen overflow-hidden
                   top-0 left-0 bottom-0
                   mt-0 md:mt-6 lg:mt-8
                   z-50
@@ -78,9 +86,11 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
 
 
                     {/* My Thoughts + Actions */}
+                    <div className="px-4 pt-6 md:pt-8">
                     <div className="flex items-center justify-between">
 
                         {/* Left: My Thoughts */}
+                        
                         <div className="flex items-center gap-1 md:gap-3">
                         <span className="text-base md:text-2xl">💭</span>
                         <div>
@@ -136,6 +146,7 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
                 </div>
             </div>
         </div>
+        </div>
 
                  
 
@@ -162,7 +173,7 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
                 </div>
 
                 {/* Thoughts List */}
-                <div className="flex-1">
+                <div className="flex-1 overflow-y-auto pr-1 pb-6">
                     <div className="flex items-center gap-1 md:gap-2 mb-2 md:mb-4">
                         <span className="text-xs md:text-lg">📚</span>
                         <h3 className="text-xs sm:text-sm md:text-sm font-semibold text-stone-300">Your Thoughts ({filteredThoughts.length})</h3>
@@ -176,7 +187,7 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
                         </div>
                     )}
                      
-
+                    
                     {filteredThoughts.length === 0 && !searchQuery && (
                         <div className="text-center py-4 md:py-8">
                             <span className="text-xl md:text-3xl block mb-2">📝</span>
@@ -184,10 +195,11 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
                             <p className="text-stone-600 text-xs mt-1">Create your first one above!</p>
                         </div>
                     )}
+                    
                      
 
                     <ul className="space-y-1 md:space-y-2">
-                        {filteredThoughts.map((thought) => {
+                        {uniqueFilteredThoughts.map((thought)=> {
                             return (
                                 <li key={thought.id}>
                                     <button
@@ -222,7 +234,7 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
                         <div className="text-center mb-6">
                             <span className="text-4xl block mb-3">🚪</span>
                             <h3 className="text-xl font-bold text-stone-800 mb-2">Ready to leave?</h3>
-                            <p className="text-stone-600">Are you sure you want to logout?</p>
+                            <p className="text-stone-600">Are you sure you want to leave your memory area ?</p>
                         </div>
                         <div className="flex gap-3">
                             <button

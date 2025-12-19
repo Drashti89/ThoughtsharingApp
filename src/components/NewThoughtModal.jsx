@@ -10,17 +10,18 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
     const [visibility, setVisibility] = useState('public'); // Default to public
     const [showTooltip, setShowTooltip] = useState(null);
 
-    
     // Reset form when modal opens/closes
     useEffect(() => {
         if (isOpen) {
             setVisibility('public');
         }
     }, [isOpen]);
-    
+
     // Load draft data on mount
     useEffect(() => {
         if (!user) return;
+        if (!isOpen) return;
+
 
         const draft = getSecureItem(user.uid, "draftThought");
         if (draft) {
@@ -40,7 +41,7 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
                 description: description.current?.value || "",
                 visibility: visibility
             });
-        }, 500);
+        }, 1500);
 
         return () => clearInterval(interval);
     }, [user, visibility]);
@@ -48,6 +49,8 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
     if (!isOpen) return null;
 
     function handleSave() {
+        if (!user) return;
+
         const enteredTitle = title.current.value;
         const enteredDescription = description.current.value;
 
@@ -64,16 +67,16 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
         };
 
         onAdd(thoughtData);
+
         if (user) {
             localStorage.removeItem(`secure_${user.uid}_draftThought`);
         }
-        
-        
+
         // Clear form after save
         if (title.current) title.current.value = '';
         if (description.current) description.current.value = '';
         setVisibility('public');
-        
+
         // Close the modal
         onClose();
     }
@@ -83,7 +86,7 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
         if (title.current) title.current.value = '';
         if (description.current) description.current.value = '';
         setVisibility('public');
-        
+
         // Close modal
         onClose();
     }
@@ -117,7 +120,9 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 sm:gap-3">
                                 <span className="text-xl sm:text-3xl">✨</span>
-                                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-stone-800">Add New Thought</h2>
+                                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-stone-800">
+                                    Add New Thought
+                                </h2>
                             </div>
                             <button
                                 onClick={handleCancel}
@@ -126,21 +131,23 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
                                 ×
                             </button>
                         </div>
-                        <p className="text-stone-600 mt-1 sm:mt-2 text-sm">Capture your beautiful thoughts and ideas</p>
+                        <p className="text-stone-600 mt-1 sm:mt-2 text-sm">
+                            Capture your beautiful thoughts and ideas
+                        </p>
                     </div>
 
                     {/* Scrollable Form Content */}
                     <div className="overflow-y-auto max-h-[70vh] modal-scrollbar">
-                        {/* Form */}
                         <div className="p-4 sm:p-8">
                             <Input type="text" ref={title} label="📝 Title" />
                             <Input ref={description} label="💭 Your Thought" textarea />
-                            
+
                             {/* Visibility Toggle */}
                             <div className="mt-4 sm:mt-6">
                                 <label className="block text-sm font-semibold text-stone-700 mb-2 sm:mb-3">
                                     🔒 Who can see this thought?
                                 </label>
+
                                 <div className="grid grid-cols-2 gap-2 sm:gap-3">
                                     <button
                                         type="button"
@@ -157,9 +164,12 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
                                             <span className="text-lg sm:text-2xl">🌍</span>
                                             <div>
                                                 <div className="font-semibold text-stone-800 text-sm">Public</div>
-                                                <div className="text-xs sm:text-sm text-stone-600">Visible to everyone</div>
+                                                <div className="text-xs sm:text-sm text-stone-600">
+                                                    Visible to everyone
+                                                </div>
                                             </div>
                                         </div>
+
                                         {showTooltip === 'public' && (
                                             <div className="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-stone-800 text-white text-xs rounded-lg whitespace-nowrap">
                                                 🌍 Public — visible to everyone
@@ -167,7 +177,7 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
                                             </div>
                                         )}
                                     </button>
-                                    
+
                                     <button
                                         type="button"
                                         onClick={() => setVisibility('private')}
@@ -183,9 +193,12 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
                                             <span className="text-lg sm:text-2xl">🔒</span>
                                             <div>
                                                 <div className="font-semibold text-stone-800 text-sm">Private</div>
-                                                <div className="text-xs sm:text-sm text-stone-600">Only visible to you</div>
+                                                <div className="text-xs sm:text-sm text-stone-600">
+                                                    Only visible to you
+                                                </div>
                                             </div>
                                         </div>
+
                                         {showTooltip === 'private' && (
                                             <div className="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-stone-800 text-white text-xs rounded-lg whitespace-nowrap">
                                                 🔒 Private — only visible to you
@@ -194,8 +207,7 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
                                         )}
                                     </button>
                                 </div>
-                                
-                                {/* Current Selection Indicator */}
+
                                 <div className="mt-2 sm:mt-3 flex items-center gap-2 text-xs sm:text-sm">
                                     <span className="text-stone-600">Selected:</span>
                                     <span className="font-medium">
