@@ -72,11 +72,6 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
             
             >
 
-
-          
-
-             
-
               {/* HEADER */}
                    <div className="mb-4 md:mb-6  relative">
 
@@ -156,8 +151,6 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
         </div>
         </div>
 
-                 
-
                  <div className="bg-stone-800/50 rounded-xl p-2 md:p-4 mb-4 md:mb-8">
                      
                     {!selectedThoughtId && (
@@ -184,7 +177,7 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
                 <div className="flex-1 overflow-y-auto pr-1 pb-6">
                     <div className="flex items-center gap-1 md:gap-2 mb-2 md:mb-4">
                         <span className="text-xs md:text-lg">📚</span>
-                        <h3 className="text-xs sm:text-sm md:text-sm font-semibold text-stone-300">Your Thoughts ({filteredThoughts.length})</h3>
+                        <h3 className="text-xs sm:text-sm md:text-sm font-semibold text-stone-300">Your Thoughts ({uniqueFilteredThoughts.length})</h3>
                     </div>
                      
 
