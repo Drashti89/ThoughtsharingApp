@@ -56,22 +56,22 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
                 md:rounded-r-xl
                 flex flex-col
 
-                /* 🔑 KEY FIX */
                 fixed md:static
                 top-0 left-0 bottom-0
-                h-[100dvh] md:h-auto
-                overflow-y-auto md:overflow-visible
+                h-screen
+
+                overflow-y-auto
+                scrollbar-thin scrollbar-thumb-stone-700 scrollbar-track-stone-900
 
                 mt-0 md:mt-6 lg:mt-8
                 z-50
                 transition-transform duration-300 ease-in-out
                 ${isOpen ? "translate-x-0" : "-translate-x-full"}
                 md:translate-x-0
-                
-
             `}
-            style={{ WebkitOverflowScrolling: "touch" }}
+            
             >
+
 
           
 

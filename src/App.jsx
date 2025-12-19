@@ -269,7 +269,7 @@ export default function App() {
       </button>
 
 
-      <div className="flex flex-col md:flex-row bg-white">
+      <div className="pt-8 md:pt-0 flex flex-col md:flex-row bg-white h-screen">
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
@@ -282,7 +282,7 @@ export default function App() {
           onResetUsername={handleResetUsername}
         />
 
-       <div className="flex-1 pt-20 md:pt-14 px-4 md:px-10">
+       <div className="flex-1 px-6 md:px-10 pt-5 md:pt-18 h-screen overflow-y-auto">
           {selectedThought ? (
             <div className="mt-6 md:mt-10">
               <SelectedThoughts
