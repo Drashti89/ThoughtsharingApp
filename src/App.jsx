@@ -67,8 +67,8 @@ export default function App() {
     );
   }, [user, authLoading, dispatch]);
 
-  /* ---------------- FIRST TIME USER ---------------- */
- useEffect(() => {
+ /* ---------------- FIRST TIME USER ---------------- */
+useEffect(() => {
   if (!user || !user.emailVerified) return;
 
   const unsub = onSnapshot(doc(db, "users", user.uid), snap => {
@@ -80,10 +80,8 @@ export default function App() {
     const data = snap.data();
     const hasUsername = !!data.username;
 
-    // controls redirect logic
     setIsFirstTimeUser(!hasUsername);
 
-    // 🔴 THIS IS THE IMPORTANT PART
     if (hasUsername && user.username !== data.username) {
       dispatch(setUser({ ...user, username: data.username }));
     }
@@ -323,14 +321,16 @@ export default function App() {
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
         <Route path="/signup" element={!user ? <SignUp /> : <Navigate to="/" />} />
 
-        <Route
+       <Route
           path="/set-username"
           element={
-            user && user.emailVerified && isFirstTimeUser
+            user && !user.username
               ? <SetUsername />
               : <Navigate to="/" />
           }
         />
+
+
 
         <Route
           path="/admin"
@@ -343,7 +343,7 @@ export default function App() {
             user
               ? user.isAdmin
                 ? <Navigate to="/admin" />
-                : isFirstTimeUser
+                : !user.username
                   ? <Navigate to="/set-username" />
                   : <MainLayout />
               : <Home />

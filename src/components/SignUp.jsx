@@ -50,7 +50,15 @@ export default function SignUp() {
       navigate("/login");
     } catch (err) {
       console.error(err);
-      setError("Signup failed. Please try again.");
+      if (err.code === "auth/email-already-in-use") {
+        setError("Email already in use. Please login.");
+      } else if (err.code === "auth/invalid-email") {
+        setError("Invalid email format.");
+      } else if (err.code === "auth/weak-password") {
+        setError("Password is too weak.");
+      } else {
+        setError(err.message || "Signup failed. Please try again.");
+      }
     } finally {
       setProcessing(false);
     }

@@ -19,10 +19,10 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-  let unsubscribeUser = () => {}; // 🔥 OUTSIDE
+ useEffect(() => {
+  let unsubscribeUser = () => {};
 
-  const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
+  const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
     // 🔴 No user
     if (!currentUser) {
       setUser(null);
@@ -31,34 +31,43 @@ export function AuthProvider({ children }) {
       return;
     }
 
-    // 🔴 Email not verified
+    // 🔥 CLEAN OLD LISTENER
+    unsubscribeUser();
+
+    // ✅ CHECK EMAIL VERIFICATION FIRST
     if (!currentUser.emailVerified) {
-      await signOut(auth);
       setUser(null);
       dispatch(logoutUser());
       setLoading(false);
       return;
     }
 
-    // 🔥 CLEAN OLD LISTENER (VERY IMPORTANT)
-    unsubscribeUser();
-
     // 🔥 REALTIME USER LISTENER
     unsubscribeUser = onSnapshot(
       doc(db, "users", currentUser.uid),
       (snap) => {
         if (!snap.exists()) {
+          // ✅ FIX: Handle users without Firestore doc
+          const userObj = {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            emailVerified: currentUser.emailVerified,
+            isAdmin: false,
+            username: null,
+          };
+          setUser(userObj);
+          dispatch(setReduxUser(userObj));
           setLoading(false);
           return;
         }
 
-
         const data = snap.data();
 
+        // ✅ VERIFIED USER
         const userObj = {
           uid: currentUser.uid,
           email: currentUser.email,
-          emailVerified: currentUser.emailVerified,
+          emailVerified: true,
           isAdmin: data.role === "admin",
           username: data.username ?? null,
         };
@@ -70,14 +79,12 @@ export function AuthProvider({ children }) {
     );
   });
 
-  // 🔥 CLEANUP BOTH LISTENERS
+  // 🔥 CLEANUP
   return () => {
     unsubscribeUser();
     unsubscribeAuth();
   };
 }, [dispatch]);
-
-
 
   // 📩 Login
   const emailLogin = (email, password) =>
