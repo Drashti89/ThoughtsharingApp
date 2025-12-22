@@ -42,7 +42,7 @@ export default function SignUp() {
       // ✅ IMPORTANT FIX: use userCredential.user
       await sendEmailVerification(userCredential.user);
 
-      alert("Verification email sent. Please check your inbox.");
+      alert("Verification email sent.  Please check your inbox. If you don’t see it, check the Spam folder in Gmail.");
 
       // ✅ logout to avoid auto-login bug
       await signOut(auth);
