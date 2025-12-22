@@ -9,7 +9,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { setUser as setReduxUser, logoutUser } from "../store/authSlice";
 
 const AuthContext = createContext();
@@ -20,51 +20,64 @@ export function AuthProvider({ children }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      // 🔴 No user
-      if (!currentUser) {
-        setUser(null);
-        dispatch(logoutUser());
-        setLoading(false);
-        return;
-      }
+  let unsubscribeUser = () => {}; // 🔥 OUTSIDE
 
-      // 🔴 Email not verified
-      if (!currentUser.emailVerified) {
-        await signOut(auth);
-        setUser(null);
-        dispatch(logoutUser());
-        setLoading(false);
-        return;
-      }
+  const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
+    // 🔴 No user
+    if (!currentUser) {
+      setUser(null);
+      dispatch(logoutUser());
+      setLoading(false);
+      return;
+    }
 
-      try {
-        // ✅ ONE-TIME READ (NO LISTENER)
-        const snap = await getDoc(doc(db, "users", currentUser.uid));
-        const data = snap.exists() ? snap.data() : {};
+    // 🔴 Email not verified
+    if (!currentUser.emailVerified) {
+      await signOut(auth);
+      setUser(null);
+      dispatch(logoutUser());
+      setLoading(false);
+      return;
+    }
+
+    // 🔥 CLEAN OLD LISTENER (VERY IMPORTANT)
+    unsubscribeUser();
+
+    // 🔥 REALTIME USER LISTENER
+    unsubscribeUser = onSnapshot(
+      doc(db, "users", currentUser.uid),
+      (snap) => {
+        if (!snap.exists()) {
+          setLoading(false);
+          return;
+        }
+
+
+        const data = snap.data();
 
         const userObj = {
           uid: currentUser.uid,
           email: currentUser.email,
           emailVerified: currentUser.emailVerified,
           isAdmin: data.role === "admin",
-          username: data.username || null,
+          username: data.username ?? null,
         };
 
         setUser(userObj);
         dispatch(setReduxUser(userObj));
-      } catch (err) {
-        // 🔕 Ignore permission errors during logout race
-        if (err.code !== "permission-denied") {
-          console.error("AuthContext error:", err);
-        }
-      } finally {
         setLoading(false);
       }
-    });
+    );
+  });
 
-    return () => unsubscribe();
-  }, [dispatch]);
+  // 🔥 CLEANUP BOTH LISTENERS
+  return () => {
+    unsubscribeUser();
+    unsubscribeAuth();
+  };
+}, [dispatch]);
+
+
 
   // 📩 Login
   const emailLogin = (email, password) =>

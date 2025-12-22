@@ -49,7 +49,10 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
     if (!isOpen) return null;
 
     function handleSave() {
-        if (!user) return;
+        if (!user || !user.username) {
+            alert("Please wait… username is loading");
+            return;
+        }
 
         const enteredTitle = title.current.value;
         const enteredDescription = description.current.value;
@@ -63,7 +66,10 @@ export default function NewThoughtModal({ isOpen, onClose, onAdd, user }) {
         const thoughtData = {
             title: enteredTitle,
             description: enteredDescription,
-            visibility: visibility
+            visibility: visibility,
+
+            userId: user.uid,
+            username: user.username
         };
 
         onAdd(thoughtData);
