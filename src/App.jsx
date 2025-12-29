@@ -256,16 +256,16 @@ useEffect(() => {
 
   const selectedThought = thoughts.find(t => t.id === selectedThoughtId);
 
-  /* ---------------- MAIN LAYOUT (FIXED) ---------------- */
-  const MainLayout = () => (
+  /* ---------------- MAIN LAYOUT CONTENT ---------------- */
+  const renderMainLayout = () => (
     <>
-     <button
-      onClick={() => setIsSidebarOpen(p => !p)}
-      className="md:hidden fixed top-5 left-4 z-[60] w-14 h-14 flex items-center justify-center bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl shadow-xl"
-    >
-      <span className="text-xl">☰</span>
+      <button
+        onClick={() => setIsSidebarOpen(prev => !prev)}
+        className="md:hidden fixed top-5 left-4 z-[60] w-14 h-14 flex items-center justify-center bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl shadow-xl"
+        aria-label="Toggle Menu"
+      >
+        <span className="text-2xl">☰</span>
       </button>
-
 
       <div className="pt-8 md:pt-0 flex flex-col md:flex-row bg-white h-screen">
         <Sidebar
@@ -280,7 +280,7 @@ useEffect(() => {
           onResetUsername={handleResetUsername}
         />
 
-       <div className="flex-1 px-6 md:px-10 pt-5 md:pt-18 h-screen overflow-y-auto">
+        <div className="flex-1 px-6 md:px-10 pt-5 md:pt-18 h-screen overflow-y-auto">
           {selectedThought ? (
             <div className="mt-6 md:mt-10">
               <SelectedThoughts
@@ -292,7 +292,6 @@ useEffect(() => {
                 onToggleLike={handleToggleLike}
               />
             </div>
-
           ) : (
             <NotesGrid
               thoughts={thoughts}
@@ -321,7 +320,7 @@ useEffect(() => {
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
         <Route path="/signup" element={!user ? <SignUp /> : <Navigate to="/" />} />
 
-       <Route
+        <Route
           path="/set-username"
           element={
             user && !user.username
@@ -330,11 +329,9 @@ useEffect(() => {
           }
         />
 
-
-
         <Route
           path="/admin"
-          element={user && user.isAdmin ? <MainLayout /> : <Navigate to="/" />}
+          element={user && user.isAdmin ? renderMainLayout() : <Navigate to="/" />}
         />
 
         <Route
@@ -345,7 +342,7 @@ useEffect(() => {
                 ? <Navigate to="/admin" />
                 : !user.username
                   ? <Navigate to="/set-username" />
-                  : <MainLayout />
+                  : renderMainLayout()
               : <Home />
           }
         />

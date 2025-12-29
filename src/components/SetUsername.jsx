@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { db } from '../firebase';
-import { doc, setDoc, serverTimestamp, query, collection, where, getDocs } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, query, collection, where, getDocs, updateDoc, writeBatch } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { toast } from "react-toastify";
 import { useNavigate } from 'react-router-dom';
@@ -54,6 +54,27 @@ export default function SetUsername() {
             },
             { merge: true }
             );
+
+            // Update username in all existing thoughts by this user
+            const thoughtsQuery = query(
+                collection(db, 'thoughts'),
+                where('userId', '==', user.uid)
+            );
+            
+            const thoughtsSnapshot = await getDocs(thoughtsQuery);
+            
+            if (!thoughtsSnapshot.empty) {
+                const batch = writeBatch(db);
+                
+                thoughtsSnapshot.forEach(doc => {
+                    batch.update(doc.ref, {
+                        username: trimmedUsername,
+                        updatedAt: serverTimestamp()
+                    });
+                });
+                
+                await batch.commit();
+            }
 
             // ✅ SUCCESS POPUP
             toast.success("Username set successfully 🎉");

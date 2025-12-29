@@ -23,6 +23,20 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
 
     const userId = user?.uid;
 
+    // Check if current view is mobile (below md breakpoint - 768px)
+    const isMobileView = () => {
+        return typeof window !== 'undefined' && window.innerWidth < 768;
+    };
+
+    // Handle thought selection with mobile sidebar close
+    const handleThoughtSelect = (thoughtId) => {
+        onSelectThought(thoughtId);
+        // Close sidebar on mobile view only
+        if (isMobileView() && isOpen) {
+            onClose();
+        }
+    };
+
     // 1️⃣ filter
     const filteredThoughts = thoughts.filter(thought =>
     userId &&
@@ -43,7 +57,8 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
             {/* Backdrop for mobile */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/40 z-40 md:hidden"
+                    className="fixed inset-0 bg-black/60 z-40 md:hidden animate-in fade-in"
+                    style={{ animationDuration: '1.5s' }}
                     onClick={onClose}
                 />
             )}
@@ -65,9 +80,11 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
 
                 mt-0 md:mt-6 lg:mt-8
                 z-50
-                transition-transform duration-300 ease-in-out
-                ${isOpen ? "translate-x-0" : "-translate-x-full"}
-                md:translate-x-0
+
+                slow-soft-transition
+                ${isOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"}
+                md:translate-x-0 md:opacity-100
+                md:transition-none
             `}
             
             >
@@ -204,7 +221,7 @@ export default function Sidebar({isOpen, onClose, onStartAddThought , thoughts ,
                             return (
                                 <li key={thought.id}>
                                     <button
-                                        onClick={() => onSelectThought(thought.id)}
+                                        onClick={() => handleThoughtSelect(thought.id)}
                                         className={`w-full text-left px-1.5 py-1 md:px-3 md:py-2 rounded-xl transition-all duration-200 ${
                                             thought.id === selectedThoughtId
                                                 ? 'bg-violet-500/20 text-violet-100 border border-violet-400/30'

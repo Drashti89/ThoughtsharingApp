@@ -19,6 +19,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
+  
+
  useEffect(() => {
   let unsubscribeUser = () => {};
 
@@ -87,12 +89,29 @@ export function AuthProvider({ children }) {
 }, [dispatch]);
 
   // 📩 Login
-  const emailLogin = (email, password) =>
-    signInWithEmailAndPassword(auth, email, password);
+  const emailLogin = async (email, password) => {
+  const userCredential = await signInWithEmailAndPassword(
+    auth,
+    email,
+    password
+  );
+
+  const userRef = doc(db, "users", userCredential.user.uid);
+  const snap = await getDoc(userRef);
+
+
+  return userCredential;
+};
+
 
   // 🆕 Signup
-  const signup = (email, password) =>
-    createUserWithEmailAndPassword(auth, email, password);
+  const signup = async (email, password) => {
+  return await createUserWithEmailAndPassword(auth, email, password);
+};
+
+
+  
+
 
   // 🚪 Logout
   const logout = async () => {

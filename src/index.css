@@ -79,3 +79,24 @@
 ::-webkit-scrollbar-thumb:hover {
   background-color: #8b5e3c; /* lighter brown on hover */
 }
+
+/* Animation Utilities */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-in {
+  animation-duration: 700ms;
+  animation-fill-mode: forwards;
+}
+
+.fade-in {
+  animation-name: fadeIn;
+}
+
+/* Slow Sidebar Transition */
+.slow-soft-transition {
+  transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  will-change: transform;
+}
